@@ -1,0 +1,70 @@
+---
+title: "IMGEMI-COMBO - izolacja DNA i RNA"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+date-format: "YYYY-MM-DD"
+format:
+  html:
+    self-contained: true
+    css: "C:/Users/pbpol/OneDrive/Dokumenty/NIO/robocze/medstat/style.css"
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    toc-float: true
+    include-after-body: "C:/Users/pbpol/OneDrive/Dokumenty/NIO/robocze/medstat/footer_2.html"
+execute:
+  echo: false
+  warning: false
+  message: false
+  cache: false
+---
+
+```{=html}
+<style type="text/css">
+main.content {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+body {
+  text-align: justify;
+}
+</style>
+```
+
+```{r main}
+options(java.parameters = "-Xmx1000m")
+library(knitr)
+library(survival)
+library(lubridate)
+library(ggsurvfit)
+library(gtsummary)
+library(tidycmprsk)
+library(dplyr)
+library(rms)
+library(stringi)
+library(survivalAnalysis)
+library(purrr)
+library(googlesheets4)
+library(xddd)
+library(ggpubr)
+library(DataExplorer)
+library(xlsx)
+
+remove(list=ls())
+
+qty <- read.xlsx("C:/Users/pbpol/OneDrive/Dokumenty/NIO/robocze/Zani/ZANI/lab/lab_report.xlsx", sheetName = 'quantity')
+# nanodrop_log <- read.xlsx()
+
+qty <- qty %>% mutate(
+  master_sample_id = stri_extract_all_regex(sample_id, 'Z_\\d{1,2}_\\w', simplify = TRUE)[,1]
+)
+
+qty_dna <- qty  %>% filter(material == 'DNA')
+qty_rna <- qty %>% filter(material == 'RNA')
+qty <- merge(qty_rna, qty_rna, by = 'master_sample_id',all = TRUE)
+qty_tumor <- qty %>% filter(tissue == 'tumor')
+qty_control <- qty %>% filter(tissue == 'control')
+
+plot(qty_dna$qty, qty_rna$qty, log = 'xy', xlab = 'DNA [ng]', ylab = 'RNA [ng]')
+
+```

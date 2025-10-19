@@ -1,0 +1,74 @@
+---
+title: "IMGEMI - COMBO"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+author: 'Piotr Błoński'
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    toc_depth: 2
+    includes:
+      after_body: C:/Users/pbpol/OneDrive/Dokumenty/NIO/robocze/medstat/footer.html
+
+---
+```{r echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE}
+library(knitr)
+opts_chunk$set(
+  echo = FALSE,
+  cache = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+```{r main}
+options(java.parameters = "-Xmx1000m")
+library(survival)
+library(survminer)
+library(lubridate)
+library(ggsurvfit)
+library(gtsummary)
+library(tidycmprsk)
+library(dplyr)
+library(rms)
+library(stringi)
+library(survivalAnalysis)
+library(purrr)
+library(googlesheets4)
+library(xddd)
+library(ggpubr)
+library(DataExplorer)
+library(xlsx)
+library(swimplot)
+
+remove(list=ls())
+
+
+
+main <- read.csv2("IMGEMI_CRF_1 - Main.csv", sep=',', header = FALSE)
+colnames(main) <- main[2,]
+main <- main[3:nrow(main),]
+main <- main %>% filter(eligible=='Yes')
+
+main <- main %>% mutate(pfs_months = as.durtion(start %--% pd))
+
+```
+
+<br><br><br><br><br><br>
+
+
+# Chapter {-}
+***
+
+573 patients screened
+
+124 with M1d disease
+
+30 screening (+)
+
+4+4+10 still in screening
+
+76 scr fail
+
+<br><br><br><br><br><br><br><br><br>

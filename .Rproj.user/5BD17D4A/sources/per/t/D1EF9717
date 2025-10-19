@@ -1,0 +1,32 @@
+{
+    "id": "D1EF9717",
+    "path": "~/NIO/robocze/medstat/projects/imgemi/lab_report_isolation.qmd",
+    "project_path": "lab_report_isolation.qmd",
+    "type": "quarto_markdown",
+    "hash": "3625857658",
+    "contents": "",
+    "dirty": false,
+    "created": 1760695838396.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "rmdVisualMode": "false",
+        "rmdVisualWrapConfigured": "true",
+        "tempName": "Untitled2",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "63,3",
+        "scrollLine": "39",
+        "docOutlineVisible": "0",
+        "rmdVisualCollapsedChunks": "",
+        "rmdVisualModeLocation": "2:0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1760721697,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1760721697405,
+    "read_only": false,
+    "read_only_alternatives": []
+}

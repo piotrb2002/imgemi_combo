@@ -1,0 +1,174 @@
+---
+title: "IMGEMI-COMBO - DNA & RNA isolation"
+format:
+  html:
+    self-contained: true
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    toc-float: true
+    html-date: false
+    include-after-body: "C:/Users/pbpol/OneDrive/Dokumenty/NIO/robocze/medstat/footer_3.html"
+execute:
+  echo: false
+  warning: false
+  message: false
+  cache: false
+---
+
+```{=html}
+<style type="text/css">
+main.content {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+body {
+  text-align: justify;
+}
+</style>
+```
+
+`r Sys.Date()` <br><br><br><br><br><br>
+
+
+```{r main}
+library(knitr)
+library(survival)
+library(lubridate)
+library(ggsurvfit)
+library(gtsummary)
+library(tidycmprsk)
+library(dplyr)
+library(rms)
+library(stringi)
+library(survivalAnalysis)
+library(purrr)
+library(googlesheets4)
+library(xddd)
+library(ggpubr)
+library(DataExplorer)
+library(xlsx)
+
+remove(list=ls())
+
+qty <- read.xlsx("C:/Users/pbpol/OneDrive/Dokumenty/NIO/robocze/Zani/ZANI/lab/lab_report.xlsx", sheetName = 'quantity')
+# nanodrop_log <- read.xlsx()
+
+qty <- qty %>% mutate(
+  master_sample_id = stri_extract_all_regex(sample_id, 'Z_\\d{1,2}_\\w', simplify = TRUE)[,1]
+)
+
+qty_dna <- qty  %>% filter(material == 'DNA') %>% select(master_sample_id, qty, qubit, tissue)
+qty_rna <- qty %>% filter(material == 'RNA') %>% select(master_sample_id, qty, qubit)
+qty_dna <- qty_dna %>% rename('qty_dna' = 'qty', 'qubit_dna' = 'qubit')
+qty_rna <- qty_rna %>% rename('qty_rna' = 'qty', 'qubit_rna' = 'qubit')
+qty <- merge(qty_dna, qty_rna, by = 'master_sample_id',all = TRUE)
+
+qty_tumor <- qty %>% filter(tissue == 'tumor')
+qty_control <- qty %>% filter(tissue == 'control')
+
+limits_x <- c(-1, max(qty$qty_rna, na.rm = TRUE))
+limits_y <- c(-1, max(qty$qty_dna, na.rm = TRUE))
+
+histogram_tumor_dna <- ggplot(data = qty_tumor, mapping = aes(x = qty_dna)) +
+  geom_histogram(color = "black", fill = palette.colors()[3], bins = 30) + scale_x_log10() + 
+  theme_minimal() + labs(x = 'DNA quantity [ng] (log scale)', title = 'DNA quantity - tumor tissue') +
+  geom_vline(xintercept = 500, colour = 'yellow') + geom_vline(xintercept = 260, colour = 'orange')  +
+  geom_vline(xintercept = 60, colour = 'red')+
+  scale_x_log10(limits = limits_x, labels = label_style_number())
+
+histogram_tumor_rna <- ggplot(data = qty_tumor, mapping = aes(x = qty_rna)) +
+  geom_histogram(color = "black", fill = palette.colors()[2], bins = 30) + scale_x_log10() +
+  theme_minimal() + labs(x = 'RNA quantity [ng] (log scale)', title = 'RNA quantity - tumor tissue')+
+  scale_x_log10(limits = limits_x, labels = label_style_number())
+
+
+histogram_control_dna <- ggplot(data = qty_control, mapping = aes(x = qty_dna)) +
+  geom_histogram(color = "black", fill = palette.colors()[4], bins = 30) + scale_x_log10() + 
+  theme_minimal() + labs(x = 'DNA quantity [ng] (log scale)', title = 'DNA quantity - healthy control') +
+  geom_vline(xintercept = 250, colour = 'orange') + geom_vline(xintercept = 50, colour = 'red')+
+  scale_x_log10(limits = limits_x, labels = label_style_number())
+
+histogram_control_rna <- ggplot(data = qty_control, mapping = aes(x = qty_rna)) +
+  geom_histogram(color = "black", fill = palette.colors()[5], bins = 30) + scale_x_log10() +
+  theme_minimal() + labs(x = 'RNA quantity [ng] (log scale)', title = 'RNA quantity - healthy control')+
+  scale_x_log10(limits = limits_x, labels = label_style_number())
+
+scatter_tumor <- ggplot(data = qty_tumor, mapping = aes(x = qty_rna, y = qty_dna)) + theme_minimal() +
+  geom_point(color = "black", fill = palette.colors()[6], shape = 21, size = 2) +  
+  theme_minimal() + labs(x = 'RNA quantity [ng] (log scale)',
+                         y = 'DNA quantity [ng] (log scale)',
+                         title = 'Tumor tissue') +
+  scale_x_log10(limits = limits_x, labels = label_style_number()) + scale_y_log10(limits = limits_y)
+
+scatter_control <- ggplot(data = qty_control, mapping = aes(x = qty_rna, y = qty_dna)) + theme_minimal() +
+  geom_point(color = "black", fill = palette.colors()[7], shape = 21, size = 2) +  
+  theme_minimal() + labs(x = 'RNA quantity [ng] (log scale)',
+                         y = 'DNA quantity [ng] (log scale)',
+                         title = 'Healthy control') +
+  scale_x_log10(limits = limits_x, labels = label_style_number()) + scale_y_log10(limits = limits_y)
+
+fig1 <- ggarrange(histogram_tumor_dna, histogram_tumor_rna, ncol = 2)
+fig2 <- ggarrange(histogram_control_dna, histogram_control_rna, ncol = 2)
+fig3 <- ggarrange(scatter_tumor, scatter_control, ncol = 2)
+
+
+perc <- function(x, perc_only=FALSE){
+  n_true <- sum(x,na.rm = TRUE)
+  n_tot <- length(x)
+  if(perc_only){
+  paste(round(100*n_true/n_tot, 1), '%', sep='')
+  }else{
+  paste(n_true, ' (', round(100*n_true/n_tot, 1), '%)', sep='')
+  }
+}
+
+```
+
+All `r nrow(qty)` samples from NIO-PIB underwent isolation, including `r sum(qty$tissue == 'tumor')` tumor tissue samples and `r sum(qty$tissue == 'control')` paired healthy control samples (for WES germline variant subtraction).
+
+# Tumor tissue
+***
+
+
+
+```{r, fig.width=12, fig.asp=0.25}
+
+fig1
+
+```
+<span style="color: yellow;">Yellow line</span> - 500ng - DNA quantity allowing for exectuion of RRBS (methylation profiling) and WES with a safety margin - achieved in `r perc(qty_tumor$qty_dna>=500)` samples
+
+<span style="color: orange;">Orange line</span> - 260ng - DNA quantity required for RRBS (10ng) plus recommended to perform WES (250ng) - achieved in `r perc(qty_tumor$qty_dna>=260)` samples
+
+<span style="color: red;">Red line</span> - 60ng - technical minimum needed to perform RRBS (10ng) and WES (50ng) - achieved in `r perc(qty_tumor$qty_dna>=60)` samples
+
+<br><br><br><br><br><br>
+
+# Healthy control
+***
+
+```{r, fig.width=12, fig.asp=0.25}
+
+fig2
+
+```
+
+<span style="color: orange;">Orange line</span> - 250ng - DNA quantity recommended to perform WES - achieved in `r perc(qty_control$qty_dna>=250)` samples
+
+<span style="color: red;">Red line</span> - 50ng - technical minimum needed to perform WES - achieved in `r perc(qty_control$qty_dna>=50)` samples
+
+
+
+RNA samples with concentration below detection range were set to 0.1 ng
+
+<br><br><br><br><br><br>
+
+# DNA vs RNA yield
+
+```{r, fig.width=8}
+
+fig3
+
+```
