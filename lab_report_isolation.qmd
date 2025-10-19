@@ -74,7 +74,7 @@ limits_y <- c(-1, max(qty$qty_dna, na.rm = TRUE))
 histogram_tumor_dna <- ggplot(data = qty_tumor, mapping = aes(x = qty_dna)) +
   geom_histogram(color = "black", fill = palette.colors()[3], bins = 30) + scale_x_log10() + 
   theme_minimal() + labs(x = 'DNA quantity [ng] (log scale)', title = 'DNA quantity - tumor tissue') +
-  geom_vline(xintercept = 500, colour = 'yellow') + geom_vline(xintercept = 260, colour = 'orange')  +
+  geom_vline(xintercept = 500, colour = 'green') + geom_vline(xintercept = 260, colour = 'orange')  +
   geom_vline(xintercept = 60, colour = 'red')+
   scale_x_log10(limits = limits_x, labels = label_style_number())
 
@@ -138,7 +138,7 @@ All `r nrow(qty)` samples from NIO-PIB underwent isolation, including `r sum(qty
 fig1
 
 ```
-<span style="color: yellow;">Yellow line</span> - 500ng - DNA quantity allowing for exectuion of RRBS (methylation profiling) and WES with a safety margin - achieved in `r perc(qty_tumor$qty_dna>=500)` samples
+<span style="color: green;">Green line</span> - 500ng - DNA quantity allowing for exectuion of RRBS (methylation profiling) and WES with a safety margin - achieved in `r perc(qty_tumor$qty_dna>=500)` samples
 
 <span style="color: orange;">Orange line</span> - 260ng - DNA quantity required for RRBS (10ng) plus recommended to perform WES (250ng) - achieved in `r perc(qty_tumor$qty_dna>=260)` samples
 
@@ -172,3 +172,5 @@ RNA samples with concentration below detection range were set to 0.1 ng
 fig3
 
 ```
+
+<br><br><br><br><br><br><br><br>
